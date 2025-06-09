@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação de Esterificação - Acetato de Etila</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .chemicals {
+            width: 30%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        .lab-equipment {
+            width: 70%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 300px;
+            position: relative;
+            background-color: white;
+            border-radius: 5px;
+        }
+        .chemical {
+            padding: 8px;
+            margin: 5px 0;
+            background-color: #e3f2fd;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        .chemical:hover {
+            background-color: #bbdefb;
+        }
+        .chemical.selected {
+            background-color: #64b5f6;
+            color: white;
+        }
+        .beaker {
+            position: absolute;
+            bottom: 20px;
+            left: 50px;
+            width: 100px;
+            height: 150px;
+            border: 2px solid #333;
+            border-radius: 0 0 20px 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+        }
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0;
+            transition: height 0.5s, background-color 0.5s;
+            opacity: 0.8;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #388e3c;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            min-height: 100px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h2 {
+            color: #1a5276;
+            text-align: center;
+            margin-top: 0;
+        }
+        h3 {
+            color: #34495e;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .instructions {
+            background-color: #fffde7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffd600;
+        }
+        .reaction {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .flask-setup {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 90%;
+        }
+        .condenser {
+            position: absolute;
+            left: 160px;
+            bottom: 170px;
+            width: 20px;
+            height: 80px;
+            background-color: #cfd8dc;
+            border-radius: 3px;
+        }
+        .condenser::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -5px;
+            width: 30px;
+            height: 10px;
+            background-color: #90a4ae;
+            border-radius: 3px;
+        }
+        .condenser::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: -5px;
+            width: 30px;
+            height: 10px;
+            background-color: #90a4ae;
+            border-radius: 3px;
+        }
+        .round-flask {
+            position: absolute;
+            left: 50px;
+            bottom: 20px;
+            width: 80px;
+            height: 100px;
+            border: 2px solid #333;
+            border-radius: 50px 50px 30px 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+        }
+        .heating-mantle {
+            position: absolute;
+            left: 45px;
+            bottom: 0;
+            width: 90px;
+            height: 30px;
+            background-color: #795548;
+            border-radius: 3px;
+        }
+        .receiver-flask {
+            position: absolute;
+            right: 50px;
+            bottom: 20px;
+            width: 60px;
+            height: 80px;
+            border: 2px solid #333;
+            border-radius: 0 0 15px 15px;
+            background-color: rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação de Experimentos com Compostos Orgânicos</h1>
+    <h2>Síntese do Acetato de Etila</h2>
+    
+    <div class="instructions">
+        <h3>Objetivo do Experimento:</h3>
+        <p>Sintetizar acetato de etila (um éster com aroma característico de frutas) através da reação de esterificação entre etanol e ácido acético, utilizando ácido sulfúrico como catalisador.</p>
+        
+        <div class="reaction">
+            CH₃COOH + C₂H₅OH ⇌ CH₃COOCH₂CH₃ + H₂O
+        </div>
+        
+        <h3>Instruções:</h3>
+        <ol>
+            <li>Adicione ácido acético e etanol ao balão de fundo redondo</li>
+            <li>Adicione ácido sulfúrico concentrado como catalisador</li>
+            <li>Aqueça a mistura em refluxo por alguns minutos</li>
+            <li>Observe a formação do éster (camada superior) e colete o produto</li>
+        </ol>
+    </div>
+    
+    <div class="container">
+        <div class="chemicals">
+            <h3>Compostos Disponíveis:</h3>
+            <div class="chemical" onclick="selectChemical(this, 'etanol')">Etanol (C₂H₅OH)</div>
+            <div class="chemical" onclick="selectChemical(this, 'acido-acetico')">Ácido Acético (CH₃COOH)</div>
+            <div class="chemical" onclick="selectChemical(this, 'H2SO4')">Ácido Sulfúrico (H₂SO₄)</div>
+            <div class="chemical" onclick="selectChemical(this, 'agua')">Água (H₂O)</div>
+            <div class="chemical" onclick="selectChemical(this, 'Na2CO3')">Carbonato de Sódio (Na₂CO₃)</div>
+        </div>
+        
+        <div class="lab-equipment">
+            <h3>Montagem para Refluxo</h3>
+            <div class="flask-setup">
+                <div class="round-flask" id="reaction-flask"></div>
+                <div class="condenser"></div>
+                <div class="heating-mantle"></div>
+                <div class="receiver-flask" id="receiver-flask"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div>
+        <button onclick="addToFlask()" id="add-btn">Adicionar ao Balão</button>
+        <button onclick="startReflux()" id="reflux-btn" disabled>Iniciar Refluxo</button>
+        <button onclick="distill()" id="distill-btn" disabled>Destilar</button>
+        <button onclick="washWithNa2CO3()" id="wash-btn" disabled>Lavar com Na₂CO₃</button>
+        <button onclick="resetExperiment()">Resetar Experimento</button>
+    </div>
+    
+    <div class="results" id="results">
+        <h3>Resultados:</h3>
+        <p>Nenhum experimento realizado ainda.</p>
+    </div>
+    
+    <script>
+        let selectedChemical = null;
+        let flaskContents = [];
+        let receiverContents = [];
+        let temperature = 25; // °C
+        let refluxing = false;
+        let reactionOccurred = false;
+        
+        function selectChemical(element, chemical) {
+            // Remove a seleção anterior
+            const previouslySelected = document.querySelector('.chemical.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+            
+            // Seleciona o novo
+            element.classList.add('selected');
+            selectedChemical = chemical;
+        }
+        
+        function getChemicalName(chemical) {
+            const names = {
+                'etanol': 'Etanol',
+                'acido-acetico': 'Ácido Acético',
+                'H2SO4': 'Ácido Sulfúrico',
+                'agua': 'Água',
+                'Na2CO3': 'Carbonato de Sódio',
+                'acetato-etila': 'Acetato de Etila'
+            };
+            return names[chemical] || chemical;
+        }
+        
+        function getChemicalColor(chemical) {
+            const colors = {
+                'etanol': '#a5d6a7', // verde claro
+                'acido-acetico': '#90caf9', // azul claro
+                'H2SO4': '#ffcc80', // laranja claro
+                'agua': '#e3f2fd', // azul muito claro
+                'Na2CO3': '#f8bbd0', // rosa claro
+                'acetato-etila': '#dcedc8' // verde mais claro
+            };
+            return colors[chemical] || '#ffffff';
+        }
+        
+        function addToFlask() {
+            if (!selectedChemical) {
+                alert("Selecione um composto primeiro!");
+                return;
+            }
+            
+            flaskContents.push(selectedChemical);
+            updateFlask();
+            
+            // Atualiza os botões
+            document.getElementById('reflux-btn').disabled = flaskContents.length === 0;
+            document.getElementById('distill-btn').disabled = true;
+            document.getElementById('wash-btn').disabled = true;
+            
+            // Verifica se temos os reagentes necessários para a reação
+            const hasReactants = flaskContents.includes('etanol') && flaskContents.includes('acido-acetico');
+            
+            // Mostra os resultados
+            document.getElementById('results').innerHTML = `
+                <h3>Resultados:</h3>
+                <p>✅ Adicionado ${getChemicalName(selectedChemical)} ao balão de reação.</p>
+                <p>📊 Conteúdo atual: ${flaskContents.map(c => getChemicalName(c)).join(', ')}</p>
+                ${hasReactants ? '<p>⚠️ <strong>Pronto para a reação de esterificação!</strong> Adicione H₂SO₄ como catalisador e inicie o refluxo.</p>' : ''}
+                <p>🌡️ Temperatura: ${temperature}°C</p>
+            `;
+        }
+        
+        function updateFlask() {
+            const flask = document.getElementById('reaction-flask');
+            flask.innerHTML = ''; // Limpa o balão
+            
+            // Calcula a altura de cada camada
+            const layerHeight = 100 / flaskContents.length;
+            
+            // Adiciona cada líquido como uma camada
+            flaskContents.forEach((chemical, index) => {
+                const liquid = document.createElement('div');
+                liquid.className = 'liquid';
+                liquid.style.height = `${layerHeight}%`;
+                liquid.style.backgroundColor = getChemicalColor(chemical);
+                liquid.style.bottom = `${index * layerHeight}%`;
+                liquid.title = getChemicalName(chemical);
+                flask.appendChild(liquid);
+            });
+        }
+        
+        function updateReceiver() {
+            const receiver = document.getElementById('receiver-flask');
+            receiver.innerHTML = ''; // Limpa o balão coletor
+            
+            if (receiverContents.length === 0) return;
+            
+            // Adiciona o líquido destilado
+            const liquid = document.createElement('div');
+            liquid.className = 'liquid';
+            liquid.style.height = '80%';
+            liquid.style.backgroundColor = getChemicalColor(receiverContents[0]);
+            liquid.style.bottom = '0';
+            liquid.title = getChemicalName(receiverContents[0]);
+            receiver.appendChild(liquid);
+        }
+        
+        function startReflux() {
+            if (flaskContents.length === 0) {
+                alert("O balão está vazio!");
+                return;
+            }
+            
+            refluxing = true;
+            temperature = 80; // Temperatura de refluxo
+            
+            // Verifica se a reação pode ocorrer
+            const hasCatalyst = flaskContents.includes('H2SO4');
+            const hasReactants = flaskContents.includes('etanol') && flaskContents.includes('acido-acetico');
+            
+            let reactionMessage = '';
+            
+            if (hasReactants && hasCatalyst) {
+                reactionOccurred = true;
+                reactionMessage = `
+                    <p>🔥 <strong>Reação de esterificação ocorrendo!</strong> (80°C)</p>
+                    <p>CH₃COOH + C₂H₅OH ⇌ CH₃COOCH₂CH₃ + H₂O</p>
+                    <p>O ácido sulfúrico está catalisando a formação do acetato de etila.</p>
+                `;
+            } else if (hasReactants) {
+                reactionMessage = `
+                    <p>⚠️ Mistura de etanol e ácido acético aquecida, mas sem catalisador.</p>
+                    <p>Adicione ácido sulfúrico para catalisar a reação.</p>
+                `;
+            } else {
+                reactionMessage = `
+                    <p>♨️ Aquecendo a mistura a 80°C em refluxo.</p>
+                    <p>Nenhuma reação significativa ocorrendo.</p>
+                `;
+            }
+            
+            document.getElementById('results').innerHTML = `
+                <h3>Resultados:</h3>
+                ${reactionMessage}
+                <p>📊 Conteúdo do balão: ${flaskContents.map(c => getChemicalName(c)).join(', ')}</p>
+                <p>🌡️ Temperatura: ${temperature}°C (refluxo)</p>
+            `;
+            
+            // Ativa o botão de destilação após refluxo
+            document.getElementById('distill-btn').disabled = !reactionOccurred;
+        }
+        
+        function distill() {
+            if (!reactionOccurred) {
+                alert("Nenhuma reação ocorreu para destilar!");
+                return;
+            }
+            
+            temperature = 78; // Ponto de ebulição do etanol (para simplificação)
+            receiverContents = ['acetato-etila']; // Na prática, seria uma mistura
+            
+            updateReceiver();
+            
+            document.getElementById('results').innerHTML = `
+                <h3>Resultados:</h3>
+                <p>⚗️ Destilação concluída!</p>
+                <p>O acetato de etila (ponto de ebulição ~77°C) foi coletado no balão receptor.</p>
+                <p>👃 O produto tem um aroma característico de frutas.</p>
+                <p>💧 O balão receptor contém: ${receiverContents.map(c => getChemicalName(c)).join(', ')}</p>
+                <p>🌡️ Temperatura: ${temperature}°C</p>
+            `;
+            
+            // Ativa o botão de lavagem
+            document.getElementById('wash-btn').disabled = false;
+        }
+        
+        function washWithNa2CO3() {
+            if (receiverContents.length === 0 || !receiverContents.includes('acetato-etila')) {
+                alert("Nenhum acetato de etila para lavar!");
+                return;
+            }
+            
+            // Simulação da lavagem para remover traços de ácido
+            document.getElementById('results').innerHTML = `
+                <h3>Resultados:</h3>
+                <p>🧴 Lavagem com carbonato de sódio realizada!</p>
+                <p>O Na₂CO₃ neutraliza qualquer traço de ácido acético remanescente.</p>
+                <p>⚗️ O acetato de etila purificado está pronto para uso.</p>
+                <p>🎉 <strong>Experimento concluído com sucesso!</strong></p>
+                <p>💧 Produto final: Acetato de etila (CH₃COOCH₂CH₃)</p>
+            `;
+        }
+        
+        function resetExperiment() {
+            flaskContents = [];
+            receiverContents = [];
+            temperature = 25;
+            refluxing = false;
+            reactionOccurred = false;
+            
+            updateFlask();
+            updateReceiver();
+            
+            // Desmarca qualquer composto selecionado
+            const selected = document.querySelector('.chemical.selected');
+            if (selected) {
+                selected.classList.remove('selected');
+            }
+            selectedChemical = null;
+            
+            // Atualiza os botões
+            document.getElementById('reflux-btn').disabled = true;
+            document.getElementById('distill-btn').disabled = true;
+            document.getElementById('wash-btn').disabled = true;
+            
+            document.getElementById('results').innerHTML = `
+                <h3>Resultados:</h3>
+                <p>🧫 Nenhum experimento realizado ainda.</p>
+            `;
+        }
+    </script>
+</body>
+</html>

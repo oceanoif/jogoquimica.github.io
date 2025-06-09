@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quem Sou Eu? - Nomenclatura Orgânica</title>
+    <style>
+        :root {
+            --primary: #6a1b9a;
+            --secondary: #9c4dcc;
+            --accent: #ffab00;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --success: #4caf50;
+            --error: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            transition: all 0.3s ease;
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--dark);
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+        }
+        
+        .question-text {
+            background-color: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .option-btn {
+            background-color: white;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .option-btn:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 27, 154, 0.3);
+        }
+        
+        .option-btn.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .option-btn.incorrect {
+            background-color: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+        
+        .next-btn {
+            background-color: var(--accent);
+            color: var(--dark);
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            display: block;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .next-btn:hover {
+            background-color: #ffc400;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 171, 0, 0.3);
+        }
+        
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .result-score {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .restart-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .restart-btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 27, 154, 0.3);
+        }
+        
+        @media (max-width: 600px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quem Sou Eu?</h1>
+        <p class="subtitle">Desafio de Nomenclatura de Compostos Orgânicos</p>
+    </header>
+    
+    <div class="game-container">
+        <div class="score-container">
+            <span class="score">Pontuação: 0</span>
+            <span class="question-count">Pergunta 1/50</span>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        
+        <div class="question-container">
+            <div class="question-text"></div>
+            <div class="options-container"></div>
+            <button class="next-btn">Próxima Pergunta</button>
+        </div>
+        
+        <div class="result-container">
+            <h2 class="result-title">Quiz Concluído!</h2>
+            <p class="result-score">Você acertou <span class="final-score">0</span> de <span class="total-questions">50</span> perguntas</p>
+            <button class="restart-btn">Jogar Novamente</button>
+        </div>
+    </div>
+    
+    <script>
+        const questions = [
+            // Hidrocarbonetos (20 perguntas)
+            {
+                description: "Sou o hidrocarboneto mais simples, com apenas 1 átomo de carbono e 4 de hidrogênio, formando ligações simples.",
+                options: ["Metano", "Etano", "Metanol", "Eteno"],
+                answer: "Metano"
+            },
+            {
+                description: "Tenho uma dupla ligação entre carbonos, sou um hidrocarboneto insaturado e tenho 2 carbonos em minha cadeia.",
+                options: ["Etano", "Eteno", "Etino", "Etanol"],
+                answer: "Eteno"
+            },
+            {
+                description: "Possuo uma tripla ligação entre carbonos, sou um hidrocarboneto insaturado e tenho 2 carbonos em minha estrutura.",
+                options: ["Eteno", "Etano", "Etino", "Propeno"],
+                answer: "Etino"
+            },
+            {
+                description: "Sou um hidrocarboneto saturado com 3 carbonos em cadeia linear, onde todos os carbonos fazem apenas ligações simples.",
+                options: ["Propano", "Propeno", "Propino", "Butano"],
+                answer: "Propano"
+            },
+            {
+                description: "Sou um hidrocarboneto insaturado com 3 carbonos e uma dupla ligação entre o primeiro e o segundo carbono.",
+                options: ["Propano", "Propeno", "Propino", "Buteno"],
+                answer: "Propeno"
+            },
+            {
+                description: "Sou um hidrocarboneto cíclico com 6 carbonos, onde todos fazem ligações simples entre si formando um anel.",
+                options: ["Hexano", "Ciclo-hexano", "Benzeno", "Hexeno"],
+                answer: "Ciclo-hexano"
+            },
+            {
+                description: "Sou um hidrocarboneto aromático com 6 carbonos formando um anel, com ligações duplas alternadas.",
+                options: ["Ciclo-hexano", "Benzeno", "Hexeno", "Ciclo-hexeno"],
+                answer: "Benzeno"
+            },
+            {
+                description: "Sou um hidrocarboneto saturado com 4 carbonos em cadeia linear, usado em isqueiros.",
+                options: ["Butano", "Buteno", "Butino", "Pentano"],
+                answer: "Butano"
+            },
+            {
+                description: "Sou um hidrocarboneto insaturado com 4 carbonos e uma dupla ligação na posição 2 da cadeia.",
+                options: ["Butano", "1-Buteno", "2-Buteno", "Butino"],
+                answer: "2-Buteno"
+            },
+            {
+                description: "Sou um hidrocarboneto com 5 carbonos em cadeia linear e todas as ligações entre carbonos são simples.",
+                options: ["Pentano", "Penteno", "Pentino", "Hexano"],
+                answer: "Pentano"
+            },
+            {
+                description: "Sou um hidrocarboneto ramificado com 4 carbonos, onde três se ligam a um carbono central.",
+                options: ["n-Butano", "Isobutano", "Neopentano", "Isopentano"],
+                answer: "Isobutano"
+            },
+            {
+                description: "Sou um hidrocarboneto com 7 carbonos em cadeia linear, usado como solvente não polar.",
+                options: ["Heptano", "Hexano", "Hepteno", "Octano"],
+                answer: "Heptano"
+            },
+            {
+                description: "Sou um hidrocarboneto insaturado com 5 carbonos e uma tripla ligação no final da cadeia.",
+                options: ["1-Pentino", "2-Pentino", "1-Penteno", "Pentano"],
+                answer: "1-Pentino"
+            },
+            {
+                description: "Sou um hidrocarboneto ramificado com 5 carbonos, onde quatro se ligam a um carbono central.",
+                options: ["Isopentano", "Neopentano", "n-Pentano", "Isopenteno"],
+                answer: "Neopentano"
+            },
+            {
+                description: "Sou um hidrocarboneto cíclico com 5 carbonos formando um anel pentagonal.",
+                options: ["Ciclopentano", "Ciclopenteno", "Pentano", "Ciclopentino"],
+                answer: "Ciclopentano"
+            },
+            {
+                description: "Sou um hidrocarboneto aromático com um anel de benzeno e um grupo metila ligado a ele.",
+                options: ["Tolueno", "Benzeno", "Xileno", "Estireno"],
+                answer: "Tolueno"
+            },
+            {
+                description: "Sou um hidrocarboneto insaturado com 6 carbonos e duas duplas ligações conjugadas.",
+                options: ["Hexadieno", "Benzeno", "Hexino", "Ciclo-hexeno"],
+                answer: "Hexadieno"
+            },
+            {
+                description: "Sou um hidrocarboneto com 8 carbonos em cadeia linear, componente importante da gasolina.",
+                options: ["Octano", "Heptano", "Octeno", "Nonano"],
+                answer: "Octano"
+            },
+            {
+                description: "Sou um hidrocarboneto aromático com dois anéis de benzeno fundidos.",
+                options: ["Naftaleno", "Antraceno", "Fenantreno", "Benzeno"],
+                answer: "Naftaleno"
+            },
+            {
+                description: "Sou um hidrocarboneto com 10 carbonos em cadeia linear, usado em querosene.",
+                options: ["Decano", "Nonano", "Undecano", "Dodecano"],
+                answer: "Decano"
+            },
+
+            // Compostos Oxigenados (20 perguntas)
+            {
+                description: "Possuo um grupo OH (hidroxila) ligado a um carbono que faz parte de uma cadeia com 1 carbono.",
+                options: ["Metanal", "Metano", "Metanol", "Ácido metanoico"],
+                answer: "Metanol"
+            },
+            {
+                description: "Tenho um grupo funcional carbonila (C=O) no final da cadeia, com 2 carbonos no total.",
+                options: ["Etanol", "Etanal", "Ácido etanoico", "Etanona"],
+                answer: "Etanal"
+            },
+            {
+                description: "Possuo um grupo carboxila (COOH), sou um ácido carboxílico com 1 carbono em minha estrutura.",
+                options: ["Metanol", "Metanal", "Ácido metanoico", "Metanoato de metila"],
+                answer: "Ácido metanoico"
+            },
+            {
+                description: "Tenho um grupo funcional cetona (C=O) no meio da cadeia, com 3 carbonos no total.",
+                options: ["Propanal", "Propanona", "Ácido propanóico", "Propanol"],
+                answer: "Propanona"
+            },
+            {
+                description: "Sou um éster derivado do ácido metanoico e metanol, com aroma característico.",
+                options: ["Metanoato de metila", "Etanoato de etila", "Acetato de metila", "Formiato de etila"],
+                answer: "Metanoato de metila"
+            },
+            {
+                description: "Possuo dois grupos OH (hidroxila) em carbonos diferentes de uma cadeia com 2 carbonos.",
+                options: ["Etanodiol", "Metanol", "Etanol", "Propanodiol"],
+                answer: "Etanodiol"
+            },
+            {
+                description: "Sou um aldeído aromático com um anel benzênico e um grupo formila (CHO) ligado a ele.",
+                options: ["Benzaldeído", "Ácido benzoico", "Fenol", "Tolueno"],
+                answer: "Benzaldeído"
+            },
+            {
+                description: "Tenho um grupo éter entre dois grupos metila, sendo o éter mais simples que existe.",
+                options: ["Metoximetano", "Etoxietano", "Metoxietano", "Dimetiléter"],
+                answer: "Metoximetano"
+            },
+            {
+                description: "Sou um ácido carboxílico com 2 carbonos, líquido incolor com cheiro pungente.",
+                options: ["Ácido metanoico", "Ácido etanoico", "Ácido propanoico", "Ácido butanoico"],
+                answer: "Ácido etanoico"
+            },
+            {
+                description: "Possuo um grupo OH (hidroxila) ligado a um anel benzênico, sou um conhecido anti-séptico.",
+                options: ["Benzaldeído", "Ácido benzoico", "Fenol", "Tolueno"],
+                answer: "Fenol"
+            },
+            {
+                description: "Sou uma cetona com 4 carbonos, onde o grupo carbonila está no carbono 2 da cadeia.",
+                options: ["Butanona", "Pentanona", "Butanal", "Butanol"],
+                answer: "Butanona"
+            },
+            {
+                description: "Tenho um grupo éter entre um etil e um metil, usado como anestésico no passado.",
+                options: ["Metoxietano", "Etoxietano", "Metoximetano", "Etoximetano"],
+                answer: "Metoxietano"
+            },
+            {
+                description: "Sou um álcool terciário com 4 carbonos, onde o OH está ligado ao carbono central.",
+                options: ["1-Butanol", "2-Butanol", "terc-Butanol", "Isobutanol"],
+                answer: "terc-Butanol"
+            },
+            {
+                description: "Possuo um grupo carboxila (COOH) ligado diretamente a um anel benzênico.",
+                options: ["Benzaldeído", "Ácido benzoico", "Fenol", "Tolueno"],
+                answer: "Ácido benzoico"
+            },
+            {
+                description: "Sou um éster derivado do ácido etanoico e etanol, com aroma de frutas.",
+                options: ["Etanoato de etila", "Metanoato de metila", "Propanoato de etila", "Butanoato de metila"],
+                answer: "Etanoato de etila"
+            },
+            {
+                description: "Tenho três grupos OH (hidroxila) em uma cadeia com 3 carbonos, sou um triálcool.",
+                options: ["Glicerol", "Etanodiol", "Propanotriol", "Butanodiol"],
+                answer: "Glicerol"
+            },
+            {
+                description: "Sou um aldeído com 3 carbonos, onde o grupo formila está no final da cadeia.",
+                options: ["Propanal", "Propanona", "Ácido propanóico", "Propanol"],
+                answer: "Propanal"
+            },
+            {
+                description: "Possuo um grupo éter cíclico com 2 carbonos e 1 oxigênio formando um anel de três membros.",
+                options: ["Oxirano", "Tetraidrofurano", "Dioxano", "Pirano"],
+                answer: "Oxirano"
+            },
+            {
+                description: "Sou um ácido dicarboxílico com 2 carbonos entre os grupos carboxila.",
+                options: ["Ácido oxálico", "Ácido malônico", "Ácido succínico", "Ácido adípico"],
+                answer: "Ácido oxálico"
+            },
+            {
+                description: "Tenho um grupo cetona cíclica com 6 carbonos, onde o carbono 1 faz dupla ligação com oxigênio.",
+                options: ["Ciclo-hexanona", "Ciclo-hexanol", "Ciclo-hexanal", "Ciclo-hexeno"],
+                answer: "Ciclo-hexanona"
+            },
+
+            // Compostos Nitrogenados (10 perguntas)
+            {
+                description: "Tenho um grupo funcional amina (-NH₂) ligado a um carbono que faz parte de uma cadeia com 1 carbono.",
+                options: ["Metilamina", "Aminometano", "Metanol", "Metanal"],
+                answer: "Metilamina"
+            },
+            {
+                description: "Possuo um grupo nitro (-NO₂) ligado a um anel benzênico, sou um explosivo conhecido.",
+                options: ["Nitrobenzeno", "Nitrotolueno", "Trinitrotolueno", "Anilina"],
+                answer: "Trinitrotolueno"
+            },
+            {
+                description: "Sou uma amina primária aromática com um grupo -NH₂ ligado diretamente a um anel benzênico.",
+                options: ["Anilina", "Nitrobenzeno", "Benzilamina", "Fenilamina"],
+                answer: "Anilina"
+            },
+            {
+                description: "Tenho um grupo nitrila (-C≡N) ligado a uma cadeia com 2 carbonos.",
+                options: ["Etanonitrila", "Propanonitrila", "Acetonitrila", "Butanonitrila"],
+                answer: "Propanonitrila"
+            },
+            {
+                description: "Sou uma diamina com 4 carbonos entre os grupos amina, usada na produção de náilon.",
+                options: ["Etilenodiamina", "Hexametilenodiamina", "Butanodiamina", "Putrescina"],
+                answer: "Hexametilenodiamina"
+            },
+            {
+                description: "Possuo um grupo amida (-CONH₂) derivado do ácido etanoico.",
+                options: ["Acetamida", "Formamida", "Propionamida", "Butanamida"],
+                answer: "Acetamida"
+            },
+            {
+                description: "Sou um composto heterocíclico com 5 átomos, sendo 4 carbonos e 1 nitrogênio.",
+                options: ["Pirrol", "Piridina", "Imidazol", "Pirazol"],
+                answer: "Pirrol"
+            },
+            {
+                description: "Tenho um grupo amino (-NH₂) e um grupo carboxila (-COOH) ligados ao mesmo carbono.",
+                options: ["Glicina", "Alanina", "Ácido aminobutírico", "Serina"],
+                answer: "Glicina"
+            },
+            {
+                description: "Sou uma amina terciária com três grupos metila ligados ao nitrogênio.",
+                options: ["Trimetilamina", "Dimetilamina", "Metilamina", "Etilamina"],
+                answer: "Trimetilamina"
+            },
+            {
+                description: "Possuo um grupo ciano (-CN) ligado a um anel benzênico, sou um nitrila aromática.",
+                options: ["Benzonitrila", "Fenilacetonitrila", "Cianobenzeno", "Nitrobenzeno"],
+                answer: "Benzonitrila"
+            }
+        ];
+        
+        // Elementos do DOM
+        const questionText = document.querySelector('.question-text');
+        const optionsContainer = document.querySelector('.options-container');
+        const nextBtn = document.querySelector('.next-btn');
+        const scoreElement = document.querySelector('.score');
+        const questionCountElement = document.querySelector('.question-count');
+        const progressBar = document.querySelector('.progress');
+        const questionContainer = document.querySelector('.question-container');
+        const resultContainer = document.querySelector('.result-container');
+        const finalScoreElement = document.querySelector('.final-score');
+        const totalQuestionsElement = document.querySelector('.total-questions');
+        const restartBtn = document.querySelector('.restart-btn');
+        
+        // Variáveis do jogo
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+        
+        // Iniciar jogo
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            showQuestion();
+            resultContainer.style.display = 'none';
+            questionContainer.style.display = 'block';
+        }
+        
+        // Mostrar pergunta
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.description;
+            
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn');
+                button.addEventListener('click', selectOption);
+                optionsContainer.appendChild(button);
+            });
+            
+            scoreElement.textContent = `Pontuação: ${score}`;
+            questionCountElement.textContent = `Pergunta ${currentQuestionIndex + 1}/${shuffledQuestions.length}`;
+            progressBar.style.width = `${(currentQuestionIndex / shuffledQuestions.length) * 100}%`;
+        }
+        
+        // Resetar estado
+        function resetState() {
+            nextBtn.style.display = 'none';
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+        
+        // Selecionar opção
+        function selectOption(e) {
+            const selectedBtn = e.target;
+            const correctAnswer = shuffledQuestions[currentQuestionIndex].answer;
+            const isCorrect = selectedBtn.textContent === correctAnswer;
+            
+            if (isCorrect) {
+                selectedBtn.classList.add('correct');
+                score++;
+                scoreElement.textContent = `Pontuação: ${score}`;
+            } else {
+                selectedBtn.classList.add('incorrect');
+                // Mostrar a resposta correta
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.textContent === correctAnswer) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+            
+            // Desabilitar todas as opções
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+            });
+            
+            nextBtn.style.display = 'block';
+        }
+        
+        // Mostrar resultado final
+        function showResult() {
+            questionContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            finalScoreElement.textContent = score;
+            totalQuestionsElement.textContent = shuffledQuestions.length;
+            progressBar.style.width = '100%';
+        }
+        
+        // Próxima pergunta
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        // Event listeners
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startGame);
+        
+        // Iniciar o jogo
+        startGame();
+    </script>
+</body>
+</html>

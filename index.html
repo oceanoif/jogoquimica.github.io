@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Nomenclatura Orgânica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto+Slab:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --glass-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--light-color);
+            overflow-x: hidden;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .header {
+            margin: 40px 0 30px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: var(--light-color);
+            font-family: 'Roboto Slab', serif;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            border-radius: 2px;
+        }
+        
+        .subtitle {
+            color: var(--light-color);
+            font-size: 1.3rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        
+        .games-container {
+            width: 90%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px 25px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .game-card:nth-child(1) {
+            background: linear-gradient(135deg, rgba(46, 134, 222, 0.7), rgba(41, 128, 185, 0.7));
+        }
+        
+        .game-card:nth-child(2) {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.7), rgba(192, 57, 43, 0.7));
+        }
+        
+        .game-card:nth-child(3) {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.7), rgba(142, 68, 173, 0.7));
+        }
+        
+        .game-card:nth-child(4) {
+            background: linear-gradient(135deg, rgba(26, 188, 156, 0.7), rgba(22, 160, 133, 0.7));
+        }
+        
+        .game-card:nth-child(5) {
+            background: linear-gradient(135deg, rgba(241, 196, 15, 0.7), rgba(243, 156, 18, 0.7));
+        }
+        
+        .game-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .game-card:hover .game-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+        
+        .game-title {
+            margin-bottom: 10px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .game-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background-color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .game-card:hover .game-title::after {
+            opacity: 1;
+        }
+        
+        .game-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 10px;
+            font-weight: normal;
+        }
+        
+        .footer {
+            margin-top: auto;
+            padding: 30px;
+            color: var(--light-color);
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+        
+        .chem-element {
+            position: absolute;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .games-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    
+    <div class="header">
+        <h1>
+            
+        </h1>
+        <p class="subtitle">Aprenda nomenclatura de compostos orgânicos de forma divertida e interativa!</p>
+    </div>
+    
+    <div class="games-container">
+        <a href="quiz.html" style="text-decoration: none;">
+            <div class="game-card">
+                <div class="game-icon">❓</div>
+                <div class="game-title">Quiz Orgânico</div>
+                <div class="game-desc">Teste seus conhecimentos</div>
+            </div>
+        </a>
+        
+        <a href="erro.html" style="text-decoration: none;">
+            <div class="game-card">
+                <div class="game-icon">🔍</div>
+                <div class="game-title">Encontre o Erro</div>
+                <div class="game-desc">Identifique erros em nomenclaturas</div>
+            </div>
+        </a>
+        
+        <a href="cartas.html" style="text-decoration: none;">
+            <div class="game-card">
+                <div class="game-icon">🃏</div>
+                <div class="game-title">Cartas Orgânicas</div>
+                <div class="game-desc">Jogo de memória com funções</div>
+            </div>
+        </a>
+        
+        <a href="quemsoueu.html" style="text-decoration: none;">
+            <div class="game-card">
+                <div class="game-icon">👤</div>
+                <div class="game-title">Quem Sou Eu?</div>
+                <div class="game-desc">Adivinhe a função orgânica</div>
+            </div>
+        </a>
+        
+        <a href="simulacao.html" style="text-decoration: none;">
+            <div class="game-card">
+                <div class="game-icon">💻</div>
+                <div class="game-title">Simulação</div>
+                <div class="game-desc">Monte moléculas virtualmente</div>
+            </div>
+        </a>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof particlesJS !== 'undefined') {
+                particlesJS('particles-js', {
+                    "particles": {
+                        "number": {
+                            "value": 80,
+                            "density": {
+                                "enable": true,
+                                "value_area": 800
+                            }
+                        },
+                        "color": {
+                            "value": "#ffffff"
+                        },
+                        "shape": {
+                            "type": "circle",
+                            "stroke": {
+                                "width": 0,
+                                "color": "#000000"
+                            },
+                            "polygon": {
+                                "nb_sides": 5
+                            }
+                        },
+                        "opacity": {
+                            "value": 0.3,
+                            "random": true,
+                            "anim": {
+                                "enable": false,
+                                "speed": 1,
+                                "opacity_min": 0.1,
+                                "sync": false
+                            }
+                        },
+                        "size": {
+                            "value": 3,
+                            "random": true,
+                            "anim": {
+                                "enable": false,
+                                "speed": 40,
+                                "size_min": 0.1,
+                                "sync": false
+                            }
+                        },
+                        "line_linked": {
+                            "enable": true,
+                            "distance": 150,
+                            "color": "#ffffff",
+                            "opacity": 0.2,
+                            "width": 1
+                        },
+                        "move": {
+                            "enable": true,
+                            "speed": 2,
+                            "direction": "none",
+                            "random": true,
+                            "straight": false,
+                            "out_mode": "out",
+                            "bounce": false,
+                            "attract": {
+                                "enable": false,
+                                "rotateX": 600,
+                                "rotateY": 1200
+                            }
+                        }
+                    },
+                    "interactivity": {
+                        "detect_on": "canvas",
+                        "events": {
+                            "onhover": {
+                                "enable": true,
+                                "mode": "grab"
+                            },
+                            "onclick": {
+                                "enable": true,
+                                "mode": "push"
+                            },
+                            "resize": true
+                        },
+                        "modes": {
+                            "grab": {
+                                "distance": 140,
+                                "line_linked": {
+                                    "opacity": 1
+                                }
+                            },
+                            "bubble": {
+                                "distance": 400,
+                                "size": 40,
+                                "duration": 2,
+                                "opacity": 8,
+                                "speed": 3
+                            },
+                            "repulse": {
+                                "distance": 200,
+                                "duration": 0.4
+                            },
+                            "push": {
+                                "particles_nb": 4
+                            },
+                            "remove": {
+                                "particles_nb": 2
+                            }
+                        }
+                    },
+                    "retina_detect": true
+                });
+            }
+            
+            const elements = ['C', 'H', 'O', 'N', 'S', 'P', 'Cl', 'Br', 'F', 'I', 'CH₃', 'OH', 'COOH', 'NH₂'];
+            const container = document.querySelector('body');
+            
+            for (let i = 0; i < 20; i++) {
+                const element = document.createElement('div');
+                element.className = 'chem-element';
+                element.textContent = elements[Math.floor(Math.random() * elements.length)];
+                element.style.left = Math.random() * 100 + 'vw';
+                element.style.top = Math.random() * 100 + 'vh';
+                element.style.animationDuration = (10 + Math.random() * 20) + 's';
+                element.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(element);
+            }
+        });
+        
+        function selectGame(gameNumber) {
+            const gameTitles = [
+                "Quiz Orgânico", 
+                "Encontre o Erro", 
+                "Cartas Orgânicas", 
+                "Quem Sou Eu?", 
+                "Simulação"
+            ];
+            
+            Swal.fire({
+                title: `Jogo Selecionado`,
+                html: `<b>${gameTitles[gameNumber-1]}</b><br>Preparando o jogo...`,
+                imageUrl: 'https://cdn.pixabay.com/photo/2017/01/31/23/42/decorative-2028034_640.png',
+                imageWidth: 200,
+                imageHeight: 200,
+                imageAlt: 'Molécula orgânica',
+                background: 'rgba(44, 62, 80, 0.9)',
+                backdrop: `
+                    rgba(0,0,0,0.5)
+                    url("https://i.gifer.com/7plW.gif")
+                    center top
+                    no-repeat
+                `,
+                confirmButtonText: 'Iniciar Jogo',
+                confirmButtonColor: '#2ecc71',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                cancelButtonColor: '#e74c3c'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log(`Iniciando jogo: ${gameTitles[gameNumber-1]}`);
+                }
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

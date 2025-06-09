@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Compostos Orgânicos</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: url('https://cdn.pixabay.com/photo/2017/01/31/13/14/analysis-2024041_1280.jpg') no-repeat center center/cover;
+            position: relative;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        @keyframes bubbles {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background-color: rgba(173, 216, 230, 0.3);
+            border-radius: 50%;
+            animation: bubbles 10s linear infinite;
+            z-index: 1;
+        }
+
+        .memory-game {
+            width: 90%;
+            max-width: 800px;
+            height: auto;
+            margin: auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            perspective: 1000px;
+            position: relative;
+            z-index: 2;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 10px;
+        }
+
+        .memory-card {
+            width: calc(25% - 10px);
+            height: 150px;
+            margin: 5px;
+            position: relative;
+            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+            transform: scale(1);
+            transform-style: preserve-3d;
+            transition: transform .5s;
+            cursor: pointer;
+            background: #2c3e50;
+            border-radius: 10px;
+        }
+
+        .memory-card:active {
+            transform: scale(0.97);
+            transition: transform .2s;
+        }
+
+        .memory-card.flip {
+            transform: rotateY(180deg);
+        }
+
+        .front-face,
+        .back-face {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            position: absolute;
+            border-radius: 10px;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .back-face {
+            background: #2c3e50;
+        }
+
+        .front-face {
+            transform: rotateY(180deg);
+            background: #3498db;
+        }
+
+        .front-face img,
+        .back-face img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 5px;
+        }
+
+        .next-phase-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            z-index: 3;
+            display: none;
+        }
+
+        .next-phase-container.visible {
+            display: flex;
+        }
+
+        .next-phase {
+            font-size: 24px;
+            color: #fff;
+            background: #e74c3c;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .next-phase-text {
+            color: #fff;
+            font-size: 18px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .phase-title {
+            color: #fff;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            z-index: 3;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .info-text {
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            z-index: 3;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 90%;
+            line-height: 1.5;
+        }
+
+        .continue-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #fff;
+            background: #e74c3c;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .continue-button.visible {
+            display: block;
+        }
+
+        .back-to-games {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #fff;
+            background: #e74c3c;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 3;
+            text-decoration: none;
+        }
+
+        .back-to-games.visible {
+            display: block;
+        }
+
+        /* Ajustes para 6 cartas */
+        .memory-game.phase-1 .memory-card {
+            width: calc(33.333% - 10px);
+            height: 180px;
+        }
+
+        /* Ajustes para 10 cartas */
+        .memory-game.phase-2 .memory-card {
+            width: calc(25% - 10px);
+            height: 150px;
+        }
+
+        /* Ajustes para 14 cartas */
+        .memory-game.phase-3 .memory-card {
+            width: calc(20% - 10px);
+            height: 130px;
+        }
+
+        /* Ajustes para 16 cartas */
+        .memory-game.phase-4 .memory-card {
+            width: calc(20% - 10px);
+            height: 120px;
+        }
+
+        /* Responsividade para telas menores */
+        @media (max-width: 768px) {
+            .memory-card {
+                width: calc(33.333% - 10px);
+                height: 120px;
+            }
+
+            .memory-game.phase-1 .memory-card {
+                width: calc(50% - 10px);
+                height: 150px;
+            }
+
+            .memory-game.phase-2 .memory-card {
+                width: calc(33.333% - 10px);
+                height: 120px;
+            }
+
+            .memory-game.phase-3 .memory-card {
+                width: calc(25% - 10px);
+                height: 100px;
+            }
+            
+            .memory-game.phase-4 .memory-card {
+                width: calc(25% - 10px);
+                height: 90px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .memory-card {
+                width: calc(50% - 10px);
+                height: 100px;
+                margin: 5px;
+            }
+
+            .memory-game.phase-1 .memory-card {
+                width: calc(50% - 10px);
+                height: 120px;
+            }
+
+            .memory-game.phase-2 .memory-card {
+                width: calc(33.333% - 10px);
+                height: 100px;
+            }
+
+            .memory-game.phase-3 .memory-card {
+                width: calc(25% - 10px);
+                height: 80px;
+            }
+            
+            .memory-game.phase-4 .memory-card {
+                width: calc(25% - 10px);
+                height: 70px;
+            }
+
+            .next-phase-container {
+                top: 10px;
+                right: 10px;
+                gap: 5px;
+            }
+
+            .next-phase {
+                font-size: 18px;
+                padding: 8px;
+            }
+
+            .next-phase-text {
+                font-size: 14px;
+            }
+
+            .phase-title {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .info-text {
+                font-size: 16px;
+                padding: 10px;
+            }
+
+            .continue-button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+            
+            .back-to-games {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phase-title" id="phaseTitle">Fase 1 - Álcoois e Éteres</div>
+    <div class="next-phase-container" id="nextPhaseContainer">
+        <div class="next-phase">➡️</div>
+        <div class="next-phase-text">Próxima Fase</div>
+    </div>
+    <div class="info-text" id="infoText"></div>
+    <button class="continue-button" id="continueButton">Continuar</button>
+    <a href="selecao_jogos.html" class="back-to-games" id="backToGames">Voltar à seleção de jogos</a>
+    <section class="memory-game phase-1" id="memoryGame">
+        <!-- As cartas serão inseridas dinamicamente via JavaScript -->
+    </section>
+
+    <script>
+        // Criar bolhas de fundo
+        function createBubbles() {
+            const body = document.querySelector('body');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 30 + 10;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 5}s`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                body.appendChild(bubble);
+            }
+        }
+
+        createBubbles();
+
+        const memoryGame = document.getElementById('memoryGame');
+        const nextPhaseContainer = document.getElementById('nextPhaseContainer');
+        const phaseTitle = document.getElementById('phaseTitle');
+        const infoText = document.getElementById('infoText');
+        const continueButton = document.getElementById('continueButton');
+        const backToGames = document.getElementById('backToGames');
+        let currentPhase = 1;
+        let cards = [];
+
+        const phases = [
+            { cards: 6, title: "Álcoois e Éteres" },  // Fase 1: 6 cartas (3 pares)
+            { cards: 10, title: "Nitrilos" },         // Fase 2: 10 cartas (5 pares)
+            { cards: 12, title: "Éteres e Nitrilos" } // Fase 3: 12 cartas (6 pares)
+        ];
+
+        const compoundInfo = {
+            "Butanol": "O butanol (1-butanol ou n-butanol) é um álcool primário de quatro carbonos, usado como solvente e na produção de plastificantes.",
+            "Etil-metil-éter": "O etil-metil-éter é um éter simples, usado como solvente e antigamente como anestésico. Fórmula: CH₃-O-CH₂-CH₃.",
+            "Dietiléter": "O dietiléter é um éter comum, conhecido simplesmente como 'éter', usado como solvente e antigamente como anestésico geral.",
+            "Dimetiléter": "O dimetiléter é o éter mais simples, usado como propelente em aerossóis e como combustível alternativo.",
+            "Glicerol": "O glicerol (ou glicerina) é um triálcool importante na indústria farmacêutica e cosmética, com propriedades umectantes.",
+            "Propanonitrila": "A propanonitrila (etonitrila ou acetonitrila) é um nitrilo importante usado como solvente em HPLC e na síntese orgânica.",
+            "Acetonitrila": "A acetonitrila (etanonitrila) é um solvente polar aprótico importante em química orgânica e cromatografia.",
+            "Oxolano": "O oxolano (tetrahidrofurano ou THF) é um éter cíclico importante como solvente em reações orgânicas.",
+            "Fenetol": "O fenetol (etoxibenzeno) é um éter aromático usado em perfumaria e como intermediário em síntese orgânica.",
+            "Benzonitrila": "A benzonitrila é um nitrilo aromático usado como solvente e intermediário na produção de produtos farmacêuticos.",
+            "Butanonitrila": "A butanonitrila (butironitrila) é um nitrilo usado em síntese orgânica e como solvente especializado."
+        };
+
+        const compoundData = [
+            // Fase 1 - Álcoois e Éteres (3 pares)
+            { 
+                name: "Butanol", 
+                image: "https://www.labshop.nl/wp-content/uploads/2019/07/Butanol-1-n-butanol.jpg",
+                type: "Álcool"
+            },
+            { 
+                name: "Etil-metil-éter", 
+                image: "https://th.bing.com/th/id/OIP.0IzU0YIxDnV_tu5FrKeKzQHaEY?r=0&rs=1&pid=ImgDetMain",
+                type: "Éter"
+            },
+            { 
+                name: "Dietiléter", 
+                image: "https://th.bing.com/th/id/OIP.0PBnPlHOnVO4wIS36xv_MQAAAA?r=0&rs=1&pid=ImgDetMain",
+                type: "Éter"
+            },
+            
+            // Fase 2 - Nitrilos (5 pares)
+            { 
+                name: "Dimetiléter", 
+                image: "https://th.bing.com/th/id/OIP.Q5KonxfG82zVe4hPSx0MMQAAAA?r=0&rs=1&pid=ImgDetMain",
+                type: "Éter"
+            },
+            { 
+                name: "Glicerol", 
+                image: "https://study.com/cimages/multimages/16/glycerol.jpg",
+                type: "Álcool"
+            },
+            { 
+                name: "Propanonitrila", 
+                image: "https://th.bing.com/th/id/OIP.q7vV2l16rGZ5bjnkuSyrzgHaCr?r=0&rs=1&pid=ImgDetMain",
+                type: "Nitrila"
+            },
+            { 
+                name: "Acetonitrila", 
+                image: "https://th.bing.com/th/id/OSK.dcdcee7d128bf0558708838281790328?w=200&h=200&c=12&o=6&pid=SANGAM",
+                type: "Nitrila"
+            },
+            { 
+                name: "Oxolano", 
+                image: "https://th.bing.com/th/id/OSK.QkpXOGLlkE_-Rzg_u3bVgHITucM4SiJMnGXRQ7XoLQ4?w=200&h=200&c=12&o=6&pid=SANGAM",
+                type: "Éter"
+            },
+            
+            // Fase 3 - Mistura (6 pares)
+            { 
+                name: "Fenetol", 
+                image: "https://assets.fishersci.com/TFS-Assets/CCG/Chemical-Structures/chemical-structure-cas-103-73-1.jpg-650.jpg",
+                type: "Éter"
+            },
+            { 
+                name: "Benzonitrila", 
+                image: "https://th.bing.com/th/id/OIP.LHKUnyDEEg4y3R0biZaNMQHaFn?r=0&rs=1&pid=ImgDetMain",
+                type: "Nitrila"
+            },
+            { 
+                name: "Butanonitrila", 
+                image: "https://www.infoescola.com/wp-content/uploads/2010/06/butanonitrila.jpg",
+                type: "Nitrila"
+            }
+        ];
+
+        function createCards(phase) {
+            memoryGame.innerHTML = '';
+            const numCards = phases[phase - 1].cards;
+            const startIndex = phase === 1 ? 0 : phase === 2 ? 3 : 6;
+            const endIndex = phase === 1 ? 3 : phase === 2 ? 8 : 12;
+
+            // Seleciona os compostos para esta fase
+            const selectedCompounds = compoundData.slice(startIndex, startIndex + (numCards / 2));
+            const cardData = createCardPairs(selectedCompounds);
+
+            cardData.sort(() => Math.random() - 0.5);
+
+            cardData.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('memory-card');
+                cardElement.dataset.name = card.name;
+
+                const frontFace = document.createElement('div');
+                frontFace.classList.add('front-face');
+                
+                if (card.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = card.content;
+                    img.alt = card.name;
+                    frontFace.appendChild(img);
+                } else {
+                    frontFace.textContent = card.content;
+                }
+
+                const backFace = document.createElement('div');
+                backFace.classList.add('back-face');
+                // Mostra apenas um símbolo ou ícone no verso da carta
+                backFace.textContent = "?";
+
+                cardElement.appendChild(frontFace);
+                cardElement.appendChild(backFace);
+                memoryGame.appendChild(cardElement);
+            });
+
+            memoryGame.className = `memory-game phase-${phase}`;
+            phaseTitle.textContent = `Fase ${phase} - ${phases[phase - 1].title}`;
+
+            cards = document.querySelectorAll('.memory-card');
+            cards.forEach(card => card.addEventListener('click', flipCard));
+            
+            // Inicia com todas as cartas viradas para baixo
+            setTimeout(() => {
+                cards.forEach(card => {
+                    card.classList.remove('flip');
+                });
+            }, 1000);
+        }
+
+        function createCardPairs(compounds) {
+            const pairs = [];
+            
+            compounds.forEach(compound => {
+                // Carta com a imagem da estrutura
+                pairs.push({
+                    type: 'image',
+                    content: compound.image,
+                    name: compound.name
+                });
+                
+                // Carta com o nome do composto
+                pairs.push({
+                    type: 'name',
+                    content: compound.name,
+                    name: compound.name
+                });
+            });
+            
+            return pairs;
+        }
+
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+            if (this.classList.contains('flip')) return;
+
+            this.classList.add('flip');
+
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            lockBoard = true;
+
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+            isMatch ? disableCards() : unflipCards();
+        }
+
+        function disableCards() {
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+
+            // Exibir informação sobre o composto acertado
+            const compoundName = firstCard.dataset.name;
+            if (compoundInfo[compoundName]) {
+                infoText.textContent = `${compoundName}: ${compoundInfo[compoundName]}`;
+                infoText.style.display = 'block';
+                continueButton.classList.add('visible');
+            }
+
+            checkPhaseCompletion();
+            resetBoard();
+        }
+
+        function unflipCards() {
+            setTimeout(() => {
+                firstCard.classList.remove('flip');
+                secondCard.classList.remove('flip');
+
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        function checkPhaseCompletion() {
+            const flippedCards = document.querySelectorAll('.memory-card.flip');
+            if (flippedCards.length === phases[currentPhase - 1].cards) {
+                if (currentPhase < phases.length) {
+                    nextPhaseContainer.classList.add('visible');
+                } else {
+                    infoText.textContent = "Parabéns! Você completou todas as fases e aprendeu sobre diversos compostos orgânicos. Continue estudando a fascinante química orgânica!";
+                    infoText.style.display = 'block';
+                    continueButton.classList.add('visible');
+                    backToGames.classList.add('visible');
+                }
+            }
+        }
+
+        nextPhaseContainer.addEventListener('click', () => {
+            currentPhase++;
+            nextPhaseContainer.classList.remove('visible');
+            infoText.style.display = 'none';
+            continueButton.classList.remove('visible');
+            createCards(currentPhase);
+        });
+
+        continueButton.addEventListener('click', () => {
+            infoText.style.display = 'none';
+            continueButton.classList.remove('visible');
+        });
+
+        // Inicia o jogo com todas as cartas viradas para cima brevemente
+        createCards(currentPhase);
+        cards = document.querySelectorAll('.memory-card');
+        cards.forEach(card => card.classList.add('flip'));
+        
+        // Depois de 2 segundos, vira todas as cartas para baixo
+        setTimeout(() => {
+            cards.forEach(card => card.classList.remove('flip'));
+        }, 2000);
+    </script>
+</body>
+</html>

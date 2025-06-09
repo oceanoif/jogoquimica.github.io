@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Química Check: Encontre o Erro</title>
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --secondary-green: #388E3C;
+            --light-green: #8BC34A;
+            --dark-green: #1B5E20;
+            --white: #FFFFFF;
+            --black: #212121;
+            --gray: #757575;
+            --background: #E8F5E9;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--black);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 2px solid var(--light-green);
+        }
+        h1 {
+            margin-top: 0;
+            color: var(--dark-green);
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        .compounds {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .compound {
+            background-color: var(--white);
+            border: 2px solid var(--light-green);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .compound:hover {
+            background-color: rgba(139, 195, 74, 0.1);
+            transform: translateY(-3px);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: var(--dark-green);
+            font-weight: 500;
+        }
+        .hint-btn, .next-btn {
+            background-color: var(--secondary-green);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .next-btn {
+            background-color: var(--primary-green);
+            margin-top: 20px;
+            display: none;
+        }
+        .hint-btn:hover, .next-btn:hover {
+            background-color: var(--dark-green);
+        }
+        .hint-btn:disabled {
+            background-color: #BDBDBD;
+            cursor: not-allowed;
+        }
+        .hint-text {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: rgba(139, 195, 74, 0.2);
+            border-radius: 8px;
+            color: var(--dark-green);
+            display: none;
+            border-left: 4px solid var(--light-green);
+        }
+        .feedback {
+            margin: 15px 0;
+            min-height: 30px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .correct {
+            color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.1);
+            border-left: 4px solid var(--primary-green);
+        }
+        .incorrect {
+            color: #D32F2F;
+            background-color: rgba(211, 47, 47, 0.1);
+            border-left: 4px solid #D32F2F;
+        }
+        .score-animation {
+            animation: scorePop 0.5s ease;
+        }
+        @keyframes scorePop {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        @media (max-width: 600px) {
+            .compounds { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Química Check</h1>
+        <p class="subtitle">Encontre o erro na nomenclatura dos compostos orgânicos!</p>
+        
+        <div class="stats">
+            <div>Pontuação: <span id="score">0</span></div>
+            <div>Dicas restantes: <span id="hints-left">2</span></div>
+        </div>
+        
+        <div class="compounds" id="compounds-container"></div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <button class="hint-btn" id="hint-btn" onclick="giveHint()">Dica</button>
+        <div class="hint-text" id="hint-text"></div>
+        
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">Próxima Pergunta</button>
+    </div>
+
+    <script>
+        const questions = [
+            // Fórmulas condensadas (19)
+            {
+                compounds: ["CH3-CH2-CH=CH2", "CH3-CH2-CH2-CH3", "CH4", "CH2=CH-CH3"],
+                correct: "CH3-CH2-CH=CH2",
+                explanation: "O correto seria <strong>CH3-CH=CH-CH3</strong> (But-2-eno). O composto mostrado é But-1-eno, que não segue o padrão dos outros alcanos.",
+                hints: [
+                    "Analise o tipo de ligação entre carbonos",
+                    "Um deles tem uma dupla ligação em posição diferente"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-OH", "CH3-OH", "CH2=CH2", "CH3-CH2-CH2-OH"],
+                correct: "CH2=CH2",
+                explanation: "O correto seria outro álcool como <strong>CH3-CH(OH)-CH3</strong>. 'CH2=CH2' é um alceno, não um álcool.",
+                hints: [
+                    "Três são álcoois (-OH)",
+                    "Um é um hidrocarboneto com dupla ligação"
+                ]
+            },
+            {
+                compounds: ["HCOOH", "CH3COOH", "CH3-CH2-COOH", "CH3-CH2-CH2-COOH"],
+                correct: "CH3-CH2-CH2-COOH",
+                explanation: "O correto é <strong>CH3-CH2-CH2-COOH</strong> (Ácido butanóico). O nome mostrado não usa o sufixo '-óico' com acento.",
+                hints: [
+                    "Observe a nomenclatura dos ácidos carboxílicos",
+                    "Um deles está com nome incompleto"
+                ]
+            },
+            {
+                compounds: ["C6H6", "C6H5-OH", "C6H5-CH3", "CH3-(CH2)4-CH3"],
+                correct: "CH3-(CH2)4-CH3",
+                explanation: "<strong>CH3-(CH2)4-CH3</strong> é um alcano (Hexano), não um composto aromático como os outros.",
+                hints: [
+                    "Três são derivados do benzeno",
+                    "Um é um alcano linear"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-CH2-CH2-OH", "CH3-CH2-CH(OH)-CH3", "CH3-CH(OH)-CH2-CH3", "CH3-CH2-CH2-CH2-CH2-OH"],
+                correct: "CH3-CH2-CH2-CH2-CH2-OH",
+                explanation: "O correto seria <strong>CH3-CH(OH)-CH2-CH3</strong> (Butan-2-ol). O composto mostrado é Pentan-1-ol.",
+                hints: [
+                    "Verifique o número de carbonos",
+                    "Um deles tem cadeia mais longa"
+                ]
+            },
+            {
+                compounds: ["HCHO", "CH3-CHO", "CH3-CO-CH3", "CH3-CH2-CHO"],
+                correct: "CH3-CO-CH3",
+                explanation: "Entre aldeídos, <strong>CH3-CO-CH3</strong> é uma cetona (Propanona).",
+                hints: [
+                    "Três são aldeídos",
+                    "Um é uma cetona"
+                ]
+            },
+            {
+                compounds: ["CH3-Cl", "CH3-Br", "CH3-F", "CH3-CH2-CH2-I"],
+                correct: "CH3-CH2-CH2-I",
+                explanation: "O correto seria <strong>CH3-I</strong> (Iodometano) para manter 1 carbono como os outros haletos.",
+                hints: [
+                    "Três são haletos de metila",
+                    "Um tem cadeia maior"
+                ]
+            },
+            {
+                compounds: ["CH3-NH2", "CH3-CH2-NH2", "C6H5-NH2", "CH3-CH2-CH2-NH2"],
+                correct: "C6H5-NH2",
+                explanation: "O correto seria <strong>CH3-CH2-CH2-CH2-NH2</strong> (Butilamina). 'C6H5-NH2' é uma amina aromática (Anilina).",
+                hints: [
+                    "Três são aminas alifáticas",
+                    "Uma é aromática"
+                ]
+            },
+            {
+                compounds: ["CH3-CO-NH2", "C6H5-CO-NH2", "CH3-CH2-CO-NH2", "CH3-CH2-CH2-CO-NH2"],
+                correct: "C6H5-CO-NH2",
+                explanation: "O correto seria <strong>CH3-CH2-CH2-CH2-CO-NH2</strong> (Pentanamida). 'C6H5-CO-NH2' é uma amida aromática (Benzamida).",
+                hints: [
+                    "Três são amidas alifáticas",
+                    "Uma é aromática"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-COO-CH3", "CH3-COO-CH2-CH3", "CH3-CH2-CH2-COO-CH3", "CH3-COO-CH3"],
+                correct: "CH3-CH2-CH2-COO-CH3",
+                explanation: "O correto seria <strong>CH3-COO-CH2-CH2-CH3</strong> (Propanoato de metila). O composto mostrado é Butanoato de metila.",
+                hints: [
+                    "Verifique a posição do grupo éster",
+                    "Um deles tem cadeia invertida"
+                ]
+            },
+            {
+                compounds: ["CH3-O-CH3", "CH3-CH2-O-CH3", "CH3-CH2-O-CH2-CH3", "CH3-O-CH2-CH2-CH3"],
+                correct: "CH3-O-CH2-CH2-CH3",
+                explanation: "O correto seria <strong>CH3-CH2-O-CH2-CH3</strong> (Éter etílico). O composto mostrado é Metoxipropano.",
+                hints: [
+                    "Analise a simetria dos éteres",
+                    "Um deles é assimétrico"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-CHO", "CH3-CO-CH3", "CH3-CH2-CO-CH3", "CH3-CH2-CH2-CHO"],
+                correct: "CH3-CO-CH3",
+                explanation: "O correto seria <strong>CH3-CH2-CO-CH2-CH3</strong> (Pentan-3-ona). 'CH3-CO-CH3' é Propanona.",
+                hints: [
+                    "Três são cetonas/aldeídos com mais carbonos",
+                    "Um é menor"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-COOH", "CH2=CH-COOH", "HOOC-COOH", "CH3-COOH"],
+                correct: "HOOC-COOH",
+                explanation: "O correto seria <strong>CH3-CH2-CH2-COOH</strong> (Ácido butanóico). 'HOOC-COOH' é Ácido oxálico (diácido).",
+                hints: [
+                    "Três são ácidos monocarboxílicos",
+                    "Um é dicarboxílico"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-CH2-NH2", "(CH3)2NH", "(CH3)3N", "CH3-NH2"],
+                correct: "(CH3)3N",
+                explanation: "O correto seria <strong>CH3-CH2-NH2</strong> (Etilamina). '(CH3)3N' é Trimetilamina (amina terciária).",
+                hints: [
+                    "Três são aminas primárias",
+                    "Uma é terciária"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-C≡N", "CH3-C≡N", "CH3-CH2-CH2-C≡N", "CH2=CH-C≡N"],
+                correct: "CH2=CH-C≡N",
+                explanation: "O correto seria <strong>CH3-CH2-CH2-CH2-C≡N</strong> (Pentanonitrila). 'CH2=CH-C≡N' é Acrilonitrila (contém dupla ligação).",
+                hints: [
+                    "Três são nitrilas saturadas",
+                    "Uma tem dupla ligação"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-SH", "CH3-SH", "CH3-CH2-CH2-SH", "CH3-S-CH3"],
+                correct: "CH3-S-CH3",
+                explanation: "O correto seria <strong>CH3-CH2-SH</strong> (Etanotiol). 'CH3-S-CH3' é um éter de tio (Dimetil sulfeto).",
+                hints: [
+                    "Três são tióis (-SH)",
+                    "Um é um sulfeto"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-CO-CH3", "CH3-CO-CH2-CH3", "CH3-CO-CO-CH3", "CH3-CH2-CO-CH2-CH3"],
+                correct: "CH3-CO-CO-CH3",
+                explanation: "O correto seria <strong>CH3-CH2-CO-CH2-CH3</strong> (Pentan-3-ona). 'CH3-CO-CO-CH3' é uma diketona (Butanodiona).",
+                hints: [
+                    "Três são cetonas simples",
+                    "Uma é diketona"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-CH2-Br", "CH3-CH(Br)-CH3", "CH2=CH-CH2-Br", "CH3-CH2-CH2-Cl"],
+                correct: "CH2=CH-CH2-Br",
+                explanation: "O correto seria <strong>CH3-CH2-CH2-F</strong> (1-Fluoropropano). 'CH2=CH-CH2-Br' é um haleto de alila (3-Bromopropeno).",
+                hints: [
+                    "Três são haletos de alquila saturados",
+                    "Um é insaturado"
+                ]
+            },
+            {
+                compounds: ["CH3-CH2-NO2", "CH3-NO2", "CH3-CH2-CH2-NO2", "O2N-CH2-CH2-NO2"],
+                correct: "O2N-CH2-CH2-NO2",
+                explanation: "O correto seria <strong>CH3-CH2-CH2-CH2-NO2</strong> (1-Nitrobutano). 'O2N-CH2-CH2-NO2' é um dinitrocomposto (1,2-Dinitroetano).",
+                hints: [
+                    "Três são nitrocompostos simples",
+                    "Um é dinitrocomposto"
+                ]
+            },
+
+            // Fórmulas de bastão (11)
+            {
+                compounds: ["Benzofenona", "Acetofenona", "Propiofenona", "Butirofenona"],
+                correct: "Benzofenona",
+                explanation: "O correto seria <strong>Butirofenona</strong>. 'Benzofenona' tem dois anéis benzênicos, enquanto as outras têm apenas um.",
+                hints: [
+                    "Analise o número de anéis aromáticos",
+                    "Uma tem estrutura diferente"
+                ]
+            },
+            {
+                compounds: ["2-Hexanona", "3-Hexanona", "2-Pentanona", "3-Pentanona"],
+                correct: "2-Pentanona",
+                explanation: "O correto seria <strong>2-Hexanona</strong>. '2-Pentanona' tem um carbono a menos na cadeia principal.",
+                hints: [
+                    "Verifique o número de carbonos",
+                    "Uma tem cadeia mais curta"
+                ]
+            },
+            {
+                compounds: ["Metilamina", "Etilamina", "Propilamina", "Anilina"],
+                correct: "Anilina",
+                explanation: "O correto seria <strong>Butilamina</strong>. 'Anilina' é uma amina aromática, enquanto as outras são alifáticas.",
+                hints: [
+                    "Três são aminas alifáticas",
+                    "Uma é aromática"
+                ]
+            },
+            {
+                compounds: ["Dimetilamina", "Etilmetilamina", "Dietilamina", "Trimetilamina"],
+                correct: "Trimetilamina",
+                explanation: "O correto seria <strong>Dietilamina</strong>. 'Trimetilamina' é uma amina terciária, enquanto as outras são secundárias.",
+                hints: [
+                    "Três são aminas secundárias",
+                    "Uma é terciária"
+                ]
+            },
+            {
+                compounds: ["Acetamida", "Propionamida", "Butiramida", "Benzamida"],
+                correct: "Benzamida",
+                explanation: "O correto seria <strong>Valeramida</strong>. 'Benzamida' é uma amida aromática, enquanto as outras são alifáticas.",
+                hints: [
+                    "Três são amidas alifáticas",
+                    "Uma é aromática"
+                ]
+            },
+            {
+                compounds: ["Propanamida", "Butanamida", "Pentanamida", "Acetamida"],
+                correct: "Acetamida",
+                explanation: "O correto seria <strong>Hexanamida</strong>. 'Acetamida' tem apenas dois carbonos, enquanto as outras têm mais.",
+                hints: [
+                    "Verifique o tamanho da cadeia",
+                    "Uma é menor"
+                ]
+            },
+            {
+                compounds: ["Ácido benzoico", "Ácido fenilacético", "Ácido salicílico", "Ácido acético"],
+                correct: "Ácido acético",
+                explanation: "O correto seria <strong>Ácido cinâmico</strong>. 'Ácido acético' não tem anel aromático como os outros.",
+                hints: [
+                    "Três são ácidos aromáticos",
+                    "Um é alifático"
+                ]
+            },
+            {
+                compounds: ["Fenol", "Cresol", "Timol", "Etanol"],
+                correct: "Etanol",
+                explanation: "O correto seria <strong>Xilenol</strong>. 'Etanol' é um álcool alifático, enquanto os outros são fenóis.",
+                hints: [
+                    "Três são fenóis",
+                    "Um é álcool alifático"
+                ]
+            },
+            {
+                compounds: ["Anisol", "Fenetol", "Benzil etil éter", "Difenil éter"],
+                correct: "Difenil éter",
+                explanation: "O correto seria <strong>Metil fenil éter</strong>. 'Difenil éter' tem dois anéis aromáticos, enquanto os outros têm um.",
+                hints: [
+                    "Três têm um anel aromático",
+                    "Um tem dois anéis"
+                ]
+            },
+            {
+                compounds: ["Estireno", "Alfa-metilestireno", "Divinilbenzeno", "Cumeno"],
+                correct: "Divinilbenzeno",
+                explanation: "O correto seria <strong>Isopropilbenzeno</strong>. 'Divinilbenzeno' tem duas cadeias insaturadas, enquanto os outros têm uma.",
+                hints: [
+                    "Três têm uma cadeia lateral",
+                    "Um tem duas cadeias"
+                ]
+            },
+            {
+                compounds: ["Tolueno", "o-Xileno", "m-Xileno", "p-Xileno"],
+                correct: "Tolueno",
+                explanation: "O correto seria <strong>Etilbenzeno</strong>. 'Tolueno' tem apenas um grupo metila, enquanto os outros são xilenos (dois grupos).",
+                hints: [
+                    "Três são xilenos",
+                    "Um é tolueno"
+                ]
+            }
+        ];
+
+        // Variáveis do jogo
+        let currentQuestion = 0;
+        let score = 0;
+        let hintsLeft = 2;
+        let answered = false;
+        let shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+
+        // Elementos DOM
+        const dom = {
+            container: document.getElementById('compounds-container'),
+            feedback: document.getElementById('feedback'),
+            hintText: document.getElementById('hint-text'),
+            hintBtn: document.getElementById('hint-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            score: document.getElementById('score'),
+            hintsLeft: document.getElementById('hints-left')
+        };
+
+        // Funções do jogo
+        function showQuestion() {
+            if (currentQuestion >= shuffledQuestions.length) return endGame();
+            
+            answered = false;
+            const q = shuffledQuestions[currentQuestion];
+            dom.container.innerHTML = '';
+            dom.feedback.innerHTML = '';
+            dom.hintText.style.display = 'none';
+            dom.nextBtn.style.display = 'none';
+            
+            [...q.compounds].sort(() => Math.random() - 0.5).forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'compound';
+                div.textContent = c;
+                div.onclick = () => checkAnswer(c);
+                dom.container.appendChild(div);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if (answered) return;
+            answered = true;
+            const q = shuffledQuestions[currentQuestion];
+            
+            document.querySelectorAll('.compound').forEach(el => {
+                el.style.pointerEvents = 'none';
+                if (el.textContent === q.correct) el.style.backgroundColor = 'rgba(46, 125, 50, 0.2)';
+                else if (el.textContent === selected) el.style.backgroundColor = 'rgba(211, 47, 47, 0.2)';
+            });
+            
+            if (selected === q.correct) {
+                score += 10;
+                dom.feedback.innerHTML = `<span class="correct">✓ Correto!</span> ${q.explanation}`;
+                dom.score.classList.add('score-animation');
+                setTimeout(() => dom.score.classList.remove('score-animation'), 500);
+            } else {
+                dom.feedback.innerHTML = `<span class="incorrect">✗ Incorreto!</span> O erro estava em <strong>${q.correct}</strong>. ${q.explanation}`;
+            }
+            
+            dom.nextBtn.style.display = 'inline-block';
+            updateStats();
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            hintsLeft = 2;
+            dom.hintBtn.disabled = false;
+            showQuestion();
+        }
+
+        function giveHint() {
+            if (hintsLeft <= 0 || answered) return;
+            const q = shuffledQuestions[currentQuestion];
+            dom.hintText.textContent = q.hints[2 - hintsLeft];
+            dom.hintText.style.display = 'block';
+            hintsLeft--;
+            if (hintsLeft <= 0) dom.hintBtn.disabled = true;
+            updateStats();
+        }
+
+        function updateStats() {
+            dom.score.textContent = score;
+            dom.hintsLeft.textContent = hintsLeft;
+        }
+
+        function endGame() {
+            dom.container.innerHTML = '';
+            const percentage = Math.round(score / (shuffledQuestions.length * 10)) * 100;
+            dom.feedback.innerHTML = `
+                <h2 style="color: var(--dark-green);">Jogo Concluído!</h2>
+                <p>Sua pontuação final: <strong>${score}/${shuffledQuestions.length * 10}</strong> (${percentage}%)</p>
+                <p>Recarregue a página para jogar novamente.</p>
+            `;
+            dom.nextBtn.style.display = 'none';
+            dom.hintBtn.style.display = 'none';
+        }
+
+        // Iniciar o jogo
+        window.onload = showQuestion;
+    </script>
+</body>
+</html>

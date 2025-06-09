@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Nomenclatura Orgânica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #3a0ca3;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #7b2cbf;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .question {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .option:hover {
+            background-color: #f0e5ff;
+        }
+        
+        .option.selected {
+            background-color: #7b2cbf;
+            color: white;
+        }
+        
+        .option.correct {
+            background-color: #38b000;
+            color: white;
+        }
+        
+        .option.wrong {
+            background-color: #ef233c;
+            color: white;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: #7b2cbf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .correct-feedback {
+            background-color: rgba(56, 176, 0, 0.1);
+            border-left: 3px solid #38b000;
+        }
+        
+        .wrong-feedback {
+            background-color: rgba(239, 35, 60, 0.1);
+            border-left: 3px solid #ef233c;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background: #7b2cbf;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .result {
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .question-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz de Nomenclatura Orgânica</h1>
+        
+        <div class="progress-bar" id="progress"></div>
+        
+        <div class="quiz-info">
+            <div>Pontuação: <span id="score">0</span></div>
+            <div>Pergunta: <span id="current-question">1</span>/<span id="total-questions">40</span></div>
+        </div>
+        
+        <div class="question" id="question"></div>
+        <div id="question-image"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="controls">
+            <div>
+                <button id="remove-two">Remover 2</button>
+                <button id="skip">Pular</button>
+            </div>
+            <button id="next">Próxima</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const questions = [
+            // 20 perguntas sobre fórmulas condensadas
+            {
+                question: "Qual o nome oficial do composto: CH₃-CH₂-CH=CH₂?",
+                options: ["Butano", "1-Buteno", "2-Buteno", "Butino"],
+                answer: 1,
+                explanation: "O composto possui 4 carbonos (but-) e uma dupla ligação (-eno) na posição 1, portanto o nome correto é 1-Buteno."
+            },
+            {
+                question: "Qual é a nomenclatura IUPAC para: CH₃-CH(CH₃)-CH₂-CH₃?",
+                options: ["n-Butano", "Isobutano", "2-Metilpropano", "2-Metilbutano"],
+                answer: 2,
+                explanation: "A cadeia principal tem 3 carbonos (propano) com um metil na posição 2, portanto o nome correto é 2-Metilpropano."
+            },
+            {
+                question: "Como se chama o composto: CH≡C-CH₂-CH₃?",
+                options: ["1-Butino", "2-Butino", "1-Buteno", "Butano"],
+                answer: 0,
+                explanation: "O composto possui 4 carbonos (but-) e uma tripla ligação (-ino) na posição 1, portanto o nome correto é 1-Butino."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-COOH?",
+                options: ["Ácido etanoico", "Ácido propanoico", "Ácido butanoico", "Ácido metanoico"],
+                answer: 1,
+                explanation: "O composto é um ácido carboxílico com 3 carbonos (propan-) e o grupo carboxila (-oico), portanto o nome correto é Ácido propanoico."
+            },
+            {
+                question: "Qual a nomenclatura IUPAC para: CH₃-CH₂-CHO?",
+                options: ["Propanona", "Propanal", "Etanona", "Etanol"],
+                answer: 1,
+                explanation: "O composto possui 3 carbonos (propan-) com um grupo aldeído na extremidade (-al), portanto o nome correto é Propanal."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CO-CH₃?",
+                options: ["Metanal", "Etanona", "Propanona", "Metanoato de metila"],
+                answer: 2,
+                explanation: "O composto possui 3 carbonos (propan-) com uma cetona na posição 2 (-ona), portanto o nome correto é Propanona."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₃-CH₂-O-CH₂-CH₃?",
+                options: ["Etanol", "Éter etílico", "Etoxietano", "Butoxietano"],
+                answer: 2,
+                explanation: "O composto é um éter com dois grupos etila, portanto o nome correto é Etoxietano."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-CH₂-CH₂-OH?",
+                options: ["Etanol", "Propanol", "1-Butanol", "2-Butanol"],
+                answer: 2,
+                explanation: "O composto possui 4 carbonos (butan-) com um grupo hidroxila na posição 1 (-ol), portanto o nome correto é 1-Butanol."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₃-CH(NH₂)-COOH?",
+                options: ["Ácido etanoico", "Ácido 2-aminoetanoico", "Ácido 2-aminopropanoico", "Ácido 3-aminopropanoico"],
+                answer: 2,
+                explanation: "O composto possui 3 carbonos (propan-) com um grupo amina na posição 2 e um grupo carboxila, portanto o nome correto é Ácido 2-aminopropanoico."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-COO-CH₃?",
+                options: ["Metanoato de etila", "Etanoato de metila", "Propanoato de metila", "Metanoato de propila"],
+                answer: 1,
+                explanation: "O composto é um éster derivado do ácido etanoico (CH₃-COOH) e metanol (CH₃-OH), portanto o nome correto é Etanoato de metila."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₂=CH-CH=CH₂?",
+                options: ["1,3-Butadieno", "1,2-Butadieno", "2-Buteno", "1-Butino"],
+                answer: 0,
+                explanation: "O composto possui 4 carbonos com duas duplas ligações nas posições 1 e 3, portanto o nome correto é 1,3-Butadieno."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-CH₂-CH₂-CHO?",
+                options: ["Pentanal", "1-Pentanol", "Pentanoato", "Pentano"],
+                answer: 0,
+                explanation: "O composto possui 5 carbonos (pentan-) com um grupo aldeído na extremidade (-al), portanto o nome correto é Pentanal."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₃-CH₂-CH(OH)-CH₃?",
+                options: ["1-Butanol", "2-Butanol", "2-Propanol", "Etanol"],
+                answer: 1,
+                explanation: "O composto possui 4 carbonos (butan-) com um grupo hidroxila na posição 2 (-ol), portanto o nome correto é 2-Butanol."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-CH₂-CO-CH₃?",
+                options: ["2-Pentanona", "3-Pentanona", "2-Butanona", "3-Butanona"],
+                answer: 0,
+                explanation: "O composto possui 5 carbonos (pentan-) com uma cetona na posição 2 (-ona), portanto o nome correto é 2-Pentanona."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₃-CH₂-CH₂-CH₂-NH₂?",
+                options: ["1-Aminobutano", "Butanamina", "1-Butanamina", "Todas as anteriores"],
+                answer: 3,
+                explanation: "Todas as opções são nomes válidos para este composto, que possui 4 carbonos (butan-) com um grupo amina na posição 1."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH=CH-CHO?",
+                options: ["2-Butenal", "3-Butenal", "Butenodial", "1-Buten-3-ona"],
+                answer: 0,
+                explanation: "O composto possui 4 carbonos (buten-) com uma dupla ligação na posição 2 e um aldeído na extremidade (-al), portanto o nome correto é 2-Butenal."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₃-C≡C-CH₃?",
+                options: ["1-Butino", "2-Butino", "Butadieno", "Butano"],
+                answer: 1,
+                explanation: "O composto possui 4 carbonos (but-) com uma tripla ligação na posição 2 (-ino), portanto o nome correto é 2-Butino."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-CH(Br)-CH₃?",
+                options: ["1-Bromobutano", "2-Bromobutano", "3-Bromobutano", "Brometo de butila"],
+                answer: 1,
+                explanation: "O composto possui 4 carbonos (butan-) com um bromo na posição 2, portanto o nome correto é 2-Bromobutano."
+            },
+            {
+                question: "Qual a nomenclatura para: CH₃-O-CH₂-CH₂-CH₃?",
+                options: ["Metoxipropano", "Etoxietano", "Metoxietano", "Propoximetano"],
+                answer: 0,
+                explanation: "O composto é um éter com um grupo metila e um grupo propila, portanto o nome correto é Metoxipropano."
+            },
+            {
+                question: "Qual o nome do composto: CH₃-CH₂-CH₂-COO-CH₂-CH₃?",
+                options: ["Propanoato de etila", "Etanoato de propila", "Butanoato de metila", "Metanoato de butila"],
+                answer: 0,
+                explanation: "O composto é um éster derivado do ácido propanoico (CH₃-CH₂-COOH) e etanol (CH₃-CH₂-OH), portanto o nome correto é Propanoato de etila."
+            },
+            
+            // 10 perguntas sobre grupos funcionais (mantidas)
+            {
+                question: "Qual grupo funcional está presente no composto CH₃-CH₂-OH?",
+                options: ["Cetona", "Álcool", "Aldeído", "Éter"],
+                answer: 1,
+                explanation: "O composto possui o grupo hidroxila (-OH) característico de álcoois."
+            },
+            {
+                question: "Qual desses compostos possui um grupo funcional cetona?",
+                options: ["CH₃-CHO", "CH₃-CO-CH₃", "CH₃-COOH", "CH₃-O-CH₃"],
+                answer: 1,
+                explanation: "O composto CH₃-CO-CH₃ possui o grupo carbonila (C=O) no meio da cadeia, característico de cetonas."
+            },
+            {
+                question: "O grupo funcional -COOH é característico de:",
+                options: ["Álcoois", "Ácidos carboxílicos", "Aldeídos", "Ésteres"],
+                answer: 1,
+                explanation: "O grupo -COOH (carboxila) é característico de ácidos carboxílicos."
+            },
+            {
+                question: "Qual desses compostos é um éster?",
+                options: ["CH₃-CH₂-OH", "CH₃-COO-CH₃", "CH₃-CHO", "CH₃-O-CH₃"],
+                answer: 1,
+                explanation: "O composto CH₃-COO-CH₃ possui o grupo éster (-COO-)."
+            },
+            {
+                question: "O grupo funcional -CHO representa qual função orgânica?",
+                options: ["Álcool", "Cetona", "Aldeído", "Ácido carboxílico"],
+                answer: 2,
+                explanation: "O grupo -CHO (formila) é característico de aldeídos."
+            },
+            {
+                question: "Qual desses compostos possui um grupo amina?",
+                options: ["CH₃-NH₂", "CH₃-COOH", "CH₃-CHO", "CH₃-O-CH₃"],
+                answer: 0,
+                explanation: "O composto CH₃-NH₂ possui o grupo amina (-NH₂)."
+            },
+            {
+                question: "O grupo funcional -O- entre duas cadeias de carbono representa qual função?",
+                options: ["Álcool", "Cetona", "Éter", "Aldeído"],
+                answer: 2,
+                explanation: "O grupo -O- entre carbonos é característico de éteres."
+            },
+            {
+                question: "Qual desses compostos é uma amida?",
+                options: ["CH₃-CONH₂", "CH₃-COOH", "CH₃-NH₂", "CH₃-CO-CH₃"],
+                answer: 0,
+                explanation: "O composto CH₃-CONH₂ possui o grupo amida (-CONH₂)."
+            },
+            {
+                question: "O grupo funcional -COO- é característico de:",
+                options: ["Ácidos carboxílicos", "Ésteres", "Aldeídos", "Aminas"],
+                answer: 1,
+                explanation: "O grupo -COO- é característico de ésteres."
+            },
+            {
+                question: "Qual desses compostos possui um grupo nitro?",
+                options: ["CH₃-NO₂", "CH₃-NH₂", "CH₃-COOH", "CH₃-OH"],
+                answer: 0,
+                explanation: "O composto CH₃-NO₂ possui o grupo nitro (-NO₂)."
+            },
+            
+            // 10 perguntas extras com imagens
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Isoamyl_acetate.png/640px-Isoamyl_acetate.png",
+                options: ["Acetato de isoamilo", "Pentanoato de etila", "4-metiloctan-1-ol", "Ácido benzoico"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do acetato de isoamilo, um éster com aroma de banana."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Ethyl_valerate.svg/langpt-640px-Ethyl_valerate.svg.png",
+                options: ["Acetato de etila", "Pentanoato de etila", "Ácido propanoico", "Benzoato de metila"],
+                answer: 1,
+                explanation: "A estrutura mostrada é do pentanoato de etila, um éster com aroma de maçã."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://th.bing.com/th/id/OIP.LajomVqicpL0u4_q9obqCQAAAA?r=0&rs=1&pid=ImgDetMain",
+                options: ["5-hexen-1-ol", "4-metiloctan-1-ol", "1-sec-butoxi hexano", "sec-butil acetato"],
+                answer: 1,
+                explanation: "A estrutura mostrada é do 4-metiloctan-1-ol, um álcool com cadeia ramificada."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://th.bing.com/th/id/OIP.hFPNXMl1IK3PbaNxvvODxwAAAA?r=0&rs=1&pid=ImgDetMain",
+                options: ["1-sec-butoxi hexano", "5-hexen-1-ol", "Ácido butanoico", "Acetato de isoamilo"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do 1-sec-butoxi hexano, um éter com cadeia ramificada."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://homework.study.com/cimages/multimages/16/5552386241677725742082.png",
+                options: ["5-hexen-1-ol", "Ácido acético", "Formiato de etila", "Ácido 2-etóxiacético"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do 5-hexen-1-ol, um álcool insaturado."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://de.academic.ru/pictures/dewiki/49/180px-Sec-Butylacetat.svg.png",
+                options: ["sec-butil acetato", "etóxiacetato de sec-butilo", "ácido 2-etóxiacético", "ácido propanoico"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do sec-butil acetato, um éster com cadeia ramificada."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://th.bing.com/th/id/R.4a91db4dca4e57e1cc0b869e21599fbd?rik=iP%2bh4xBaSvbcrg&pid=ImgRaw&r=0",
+                options: ["etóxiacetato de sec-butilo", "sec-butil acetato", "ácido 2-etóxiacético", "ácido propanoico"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do etóxiacetato de sec-butilo, um éster complexo."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://www.chemicalbook.com/CAS/GIF/110-99-6.gif",
+                options: ["ácido 2-etóxiacético", "ácido propanoico", "ácido benzoico", "ácido butanoico"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do ácido 2-etóxiacético, um ácido carboxílico com grupo éter."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://www.bta-tecnoalimentaria.com/wp-content/uploads/2019/10/1200px-Benzoic_acid.svg_.png",
+                options: ["ácido benzoico", "ácido propanoico", "ácido butanoico", "ácido acético"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do ácido benzoico, um ácido carboxílico aromático."
+            },
+            {
+                question: "Qual o nome deste composto?",
+                image: "https://e7.pngegg.com/pngimages/391/545/png-clipart-methyl-benzoate-benzyl-benzoate-methyl-group-methyl-anthranilate-others-angle-chemistry.png",
+                options: ["Benzoato de metila", "Formiato de etila", "Acetato de etila", "Ácido benzoico"],
+                answer: 0,
+                explanation: "A estrutura mostrada é do benzoato de metila, um éster aromático."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let removedOptions = [];
+        let shuffledQuestions = [];
+        
+        const questionElement = document.getElementById('question');
+        const questionImageElement = document.getElementById('question-image');
+        const optionsElement = document.getElementById('options');
+        const scoreElement = document.getElementById('score');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const nextButton = document.getElementById('next');
+        const removeTwoButton = document.getElementById('remove-two');
+        const skipButton = document.getElementById('skip');
+        const resultElement = document.getElementById('result');
+        const progressBar = document.getElementById('progress');
+        const feedbackElement = document.getElementById('feedback');
+        
+        function initQuiz() {
+            // Embaralhar as perguntas
+            shuffledQuestions = [...questions];
+            shuffleArray(shuffledQuestions);
+            
+            totalQuestionsElement.textContent = shuffledQuestions.length;
+            showQuestion();
+        }
+        
+        // Função para embaralhar array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionElement.textContent = currentQuestion.question;
+            currentQuestionElement.textContent = currentQuestionIndex + 1;
+            
+            // Limpar imagem anterior (se houver)
+            questionImageElement.innerHTML = '';
+            
+            // Adicionar imagem se existir na pergunta
+            if (currentQuestion.image) {
+                const img = document.createElement('img');
+                img.src = currentQuestion.image;
+                img.alt = "Estrutura química";
+                img.classList.add('question-image');
+                questionImageElement.appendChild(img);
+            }
+            
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectOption);
+                optionsElement.appendChild(optionElement);
+            });
+            
+            progressBar.style.width = `${((currentQuestionIndex + 1) / shuffledQuestions.length) * 100}%`;
+            nextButton.disabled = true;
+            removeTwoButton.disabled = false;
+            skipButton.disabled = false;
+        }
+        
+        function resetState() {
+            optionsElement.innerHTML = '';
+            selectedOption = null;
+            feedbackElement.style.display = 'none';
+            feedbackElement.className = 'feedback';
+            removedOptions = [];
+            nextButton.textContent = 'Próxima';
+        }
+        
+        function selectOption(e) {
+            if (selectedOption !== null) return;
+            
+            const selectedElement = e.target;
+            selectedOption = parseInt(selectedElement.dataset.index);
+            
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            selectedElement.classList.add('selected');
+            nextButton.disabled = false;
+        }
+        
+        function checkAnswer() {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            
+            if (selectedOption === currentQuestion.answer) {
+                options[selectedOption].classList.add('correct');
+                score += 10;
+                scoreElement.textContent = score;
+                showFeedback(currentQuestion.explanation, true);
+            } else {
+                options[selectedOption].classList.add('wrong');
+                options[currentQuestion.answer].classList.add('correct');
+                showFeedback(currentQuestion.explanation, false);
+            }
+            
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+            
+            nextButton.textContent = currentQuestionIndex < shuffledQuestions.length - 1 ? 'Próxima' : 'Ver Resultado';
+        }
+        
+        function showFeedback(explanation, isCorrect) {
+            feedbackElement.textContent = explanation;
+            feedbackElement.classList.add(isCorrect ? 'correct-feedback' : 'wrong-feedback');
+            feedbackElement.style.display = 'block';
+        }
+        
+        function removeTwoOptions() {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            let wrongOptions = [];
+            
+            options.forEach((option, index) => {
+                if (index !== currentQuestion.answer && !removedOptions.includes(index)) {
+                    wrongOptions.push(index);
+                }
+            });
+            
+            wrongOptions.sort(() => Math.random() - 0.5).slice(0, 2).forEach(index => {
+                options[index].style.opacity = '0.5';
+                options[index].style.pointerEvents = 'none';
+                removedOptions.push(index);
+            });
+            
+            removeTwoButton.disabled = true;
+        }
+        
+        function skipQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showResult();
+            } else {
+                showQuestion();
+            }
+            skipButton.disabled = true;
+        }
+        
+        function showResult() {
+            resetState();
+            questionElement.style.display = 'none';
+            questionImageElement.style.display = 'none';
+            optionsElement.style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.quiz-info').style.display = 'none';
+            
+            progressBar.style.width = '100%';
+            
+            const percentage = (score / (shuffledQuestions.length * 10)) * 100;
+            let message = `Você acertou ${Math.round(percentage)}%! (${score}/${shuffledQuestions.length * 10} pontos) `;
+            
+            if (percentage >= 80) {
+                message += "Excelente! Você domina a nomenclatura orgânica!";
+            } else if (percentage >= 60) {
+                message += "Bom trabalho! Continue estudando para melhorar ainda mais!";
+            } else if (percentage >= 40) {
+                message += "Você está no caminho certo, mas precisa praticar mais!";
+            } else {
+                message += "Não desanime! Revise os conceitos e tente novamente!";
+            }
+            
+            resultElement.textContent = message;
+            resultElement.style.display = 'block';
+        }
+        
+        function nextQuestion() {
+            if (selectedOption === null) {
+                checkAnswer();
+                return;
+            }
+            
+            checkAnswer();
+            
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                setTimeout(showQuestion, 1500); // Pequeno atraso para mostrar o feedback
+            } else {
+                setTimeout(showResult, 1500); // Pequeno atraso para mostrar o feedback
+            }
+        }
+        
+        nextButton.addEventListener('click', nextQuestion);
+        removeTwoButton.addEventListener('click', removeTwoOptions);
+        skipButton.addEventListener('click', skipQuestion);
+        
+        initQuiz();
+    </script>
+</body>
+</html>
